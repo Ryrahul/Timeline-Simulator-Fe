@@ -29,17 +29,22 @@ import {
   Brain,
   Sparkles,
   Users,
-  Briefcase,
-  ArrowLeft,
-  Star,
   Shield,
   Zap,
   CheckCircle2,
 } from "lucide-react";
+import { useSignup } from "@/hooks/auth";
+import { Link } from "react-router-dom";
 
-const accountSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  username: z.string().min(2, "Username must be at least 2 characters"),
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(5, { message: "Email should be at least 5 characters long" })
+    .email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" })
+    .max(128, { message: "Password can be up to 128 characters long" }),
 });
 
 const signupSchema = z.object({
@@ -62,14 +67,14 @@ const signupSchema = z.object({
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("signup");
-  // const { signup } = useSignup(); // Commented out since we don't have the hook
+  const { signup, login } = useSignup();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const accountForm = useForm<z.infer<typeof accountSchema>>({
-    resolver: zodResolver(accountSchema),
+  const accountForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      name: "Pedro Duarte",
-      username: "@peduarte",
+      email: "a@gmail.com",
+      password: "********",
     },
   });
 
@@ -82,16 +87,15 @@ export default function AuthPage() {
     },
   });
 
-  function onSubmitAccount(data: any) {
-    console.log("Account data:", data);
+  async function onSubmitAccount(data: z.infer<typeof loginSchema>) {
+    await login(data.email, data.password);
   }
 
   async function onSubmitSignup(data: z.infer<typeof signupSchema>) {
-    // const success = await signup(data.email, data.username, data.password);
-    // if (success) {
-    //   setActiveTab("account");
-    // }
-    console.log("Signup data:", data);
+    const success = await signup(data.email, data.username, data.password);
+    if (success) {
+      setActiveTab("account");
+    }
     setActiveTab("account");
   }
 
@@ -123,21 +127,6 @@ export default function AuthPage() {
       icon: <Zap className="w-5 h-5" />,
       title: "Instant Results",
       description: "Get insights in seconds",
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Product Manager",
-      content: "This tool helped me visualize my career transition perfectly!",
-      rating: 5,
-    },
-    {
-      name: "Mike Rodriguez",
-      role: "Entrepreneur",
-      content: "The timeline predictions were surprisingly accurate.",
-      rating: 5,
     },
   ];
 
@@ -175,10 +164,12 @@ export default function AuthPage() {
 
       <nav className="relative z-10 p-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <GitBranch className="w-8 h-8 text-cyan-400" />
-          <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            Parallel Timeline
-          </span>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <GitBranch className="w-8 h-8 text-cyan-400" />
+            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              Parallel Timeline
+            </span>
+          </Link>{" "}
         </div>
         <div className="w-20"></div>
       </nav>
@@ -209,10 +200,10 @@ export default function AuthPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-2 bg-gray-900/50 border-gray-700/50 backdrop-blur-sm">
                 <TabsTrigger
-                  value="account"
+                  value="login"
                   className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
                 >
-                  Account
+                  Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
@@ -221,59 +212,56 @@ export default function AuthPage() {
                   SignUp
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="account">
+              <TabsContent value="login">
                 <Form {...accountForm}>
                   <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
                     <Card className="bg-gray-900/50 border-gray-700/50 hover:bg-gray-800/50 backdrop-blur-sm transition-all duration-300">
                       <CardHeader>
                         <CardTitle className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                          Account
+                          Login
                         </CardTitle>
                         <CardDescription className="text-gray-300">
-                          Create a new account to get started.
+                          Welcome back! Please log in to explore your future
+                          paths.
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="grid gap-6">
                         <FormField
                           control={accountForm.control}
-                          name="name"
+                          name="email"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-gray-200">
-                                Name
+                                Email
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="Enter your name"
+                                  placeholder="Enter your email"
                                   {...field}
                                   className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-cyan-400/50 focus:ring-cyan-400/25 transition-all duration-300"
                                 />
                               </FormControl>
-                              <FormDescription className="text-gray-400">
-                                This is your name.
-                              </FormDescription>
+
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                         <FormField
                           control={accountForm.control}
-                          name="username"
+                          name="password"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-gray-200">
-                                Username
+                                Password
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="Enter username"
+                                  placeholder="Enter your password"
                                   {...field}
                                   className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-cyan-400/50 focus:ring-cyan-400/25 transition-all duration-300"
                                 />
                               </FormControl>
-                              <FormDescription className="text-gray-400">
-                                This is your public display name.
-                              </FormDescription>
+
                               <FormMessage />
                             </FormItem>
                           )}

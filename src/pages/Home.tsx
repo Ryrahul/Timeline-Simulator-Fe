@@ -21,6 +21,7 @@ import {
   Github,
   Mail,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -95,12 +96,14 @@ export default function LandingPage() {
           </span>
         </div>
         <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10"
-          >
-            Sign In
-          </Button>
+          <Link to="/signin">
+            <Button
+              variant="outline"
+              className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10"
+            >
+              Sign In
+            </Button>
+          </Link>
         </div>
       </nav>
 
