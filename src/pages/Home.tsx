@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,10 +18,25 @@ import {
   Twitter,
   Github,
   Mail,
+  LogOut,
+  Settings,
+  User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { authAtom } from "@/state/authAtom";
+import { useRecoilState } from "recoil";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function LandingPage() {
+  const [auth, setAuth] = useRecoilState(authAtom);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [email, setEmail] = useState("");
 
@@ -88,22 +101,70 @@ export default function LandingPage() {
         ))}
       </div>
 
-      <nav className="relative z-10 p-6 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+      <nav className="relative z-10 p-6 flex justify-between items-center ">
+        <div className="flex items-center space-x-2 cursor-pointer">
           <GitBranch className="w-8 h-8 text-cyan-400" />
           <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
             Parallel Timeline
           </span>
         </div>
         <div className="flex items-center space-x-4">
-          <Link to="/signin">
-            <Button
-              variant="outline"
-              className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10"
-            >
-              Sign In
-            </Button>
-          </Link>
+          {auth ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button>
+                  <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>
+                      {auth.username
+                        ? auth.username.substring(0, 2).toUpperCase()
+                        : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-64" align="end">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {auth.username}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {auth.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    setAuth(null);
+                    localStorage.removeItem("accountState");
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/signin">
+              <Button
+                variant="outline"
+                className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10"
+              >
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -354,9 +415,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center space-x-2 mb-4 ">
                 <GitBranch className="w-6 h-6 text-cyan-400" />
-                <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent ">
                   Parallel Timeline
                 </span>
               </div>

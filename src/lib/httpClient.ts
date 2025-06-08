@@ -25,11 +25,18 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login page
-      localStorage.removeItem("accountState"); // Optional: Clear account state
-      window.location.href = "/login"; // Change to your login route
+    // Defensive check
+
+    if (
+      error.response?.status === 401 &&
+      error.config?.url &&
+      !error.config.url.includes("/auth/login") &&
+      !error.config.url.includes("/auth/signup")
+    ) {
+      localStorage.removeItem("accountState");
+      window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );
