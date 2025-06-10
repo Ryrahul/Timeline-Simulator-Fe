@@ -11,4 +11,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true, // Allow access from network/IP
+    port: 5173,
+    strictPort: true,
+    cors: true, // Optional
+    hmr: {
+      protocol: "wss",
+      host: "7901-125-17-13-54.ngrok-free.app",
+      clientPort: 443, // HTTPS default port
+    },
+  },
 });
