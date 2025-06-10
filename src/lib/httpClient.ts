@@ -12,9 +12,9 @@ axiosClient.interceptors.request.use(
   (config) => {
     const accountState = localStorage.getItem("accountState");
     if (accountState) {
-      const { token } = JSON.parse(accountState);
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
+      const { accessToken } = JSON.parse(accountState);
+      if (accessToken) {
+        config.headers["Authorization"] = `Bearer ${accessToken}`;
       }
     }
     return config;
@@ -34,7 +34,7 @@ axiosClient.interceptors.response.use(
       !error.config.url.includes("/auth/signup")
     ) {
       localStorage.removeItem("accountState");
-      window.location.href = "/login";
+      window.location.href = "/signin";
     }
 
     return Promise.reject(error);
