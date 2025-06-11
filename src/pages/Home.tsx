@@ -18,25 +18,13 @@ import {
   Twitter,
   Github,
   Mail,
-  LogOut,
-  Settings,
-  User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { authAtom } from "@/state/authAtom";
-import { useRecoilState } from "recoil";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+import { AnimatedBackground } from "@/components/ui/animated-bg";
+import { Navbar } from "@/components/ui/nav";
 
 export default function LandingPage() {
-  const [auth, setAuth] = useRecoilState(authAtom);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [email, setEmail] = useState("");
 
@@ -77,96 +65,9 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-black text-white">
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-black"></div>
-        <div
-          className="absolute w-96 h-96 rounded-full bg-gradient-to-r from-cyan-500/10 to-purple-500/10 blur-3xl"
-          style={{
-            left: mousePosition.x - 192,
-            top: mousePosition.y - 192,
-            transition: "all 0.3s ease-out",
-          }}
-        ></div>
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-            }}
-          ></div>
-        ))}
-      </div>
+      <AnimatedBackground />
 
-      <nav className="relative z-10 p-6 flex justify-between items-center ">
-        <div className="flex items-center space-x-2 cursor-pointer">
-          <GitBranch className="w-8 h-8 text-cyan-400" />
-          <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            Parallel Timeline
-          </span>
-        </div>
-        <div className="flex items-center space-x-4">
-          {auth ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button>
-                  <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>
-                      {auth.username
-                        ? auth.username.substring(0, 2).toUpperCase()
-                        : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64" align="end">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {auth.username}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {auth.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    setAuth(null);
-                    localStorage.removeItem("accountState");
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/signin">
-              <Button
-                variant="outline"
-                className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10"
-              >
-                Sign In
-              </Button>
-            </Link>
-          )}
-        </div>
-      </nav>
+      <Navbar />
 
       <section className="relative z-10 min-h-screen flex items-center justify-center px-6">
         <div className="text-center max-w-4xl mx-auto">

@@ -39,6 +39,18 @@ export interface QuestionResponse {
   createdAt: string;
   Timelines: Timeline[];
 }
+
+interface LayoutNode {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  timeline: Timeline | QuestionResponse;
+  type: string;
+  children: LayoutNode[];
+  parent?: LayoutNode;
+}
+
 export function buildNodesAndEdges(
   rawData: QuestionResponse,
   onFork?: (timelineId: string) => void
@@ -50,97 +62,222 @@ export function buildNodesAndEdges(
   const nodes: any[] = [];
   const edges: any[] = [];
 
-  // Root node - main question
-  nodes.push({
+  const NODE_WIDTH = 300;
+  const MIN_HORIZONTAL_SPACING = 50;
+  const VERTICAL_SPACING = 200;
+  const ROOT_Y = 0;
+
+  const rootLayout: LayoutNode = {
     id: "root",
-    type: "card",
-    data: {
-      item: rawData,
-      label: `Question: ${rawData.text}`,
-      type: "question", // Add type to distinguish node types
-    },
-    position: { x: 600, y: 0 }, // center root
-  });
-
-  // Layout spacing
-  const timelineSpacing = 500;
-  const forkSpacing = 400;
-  const rootToTimelineSpacing = 300;
-  const timelineToForkSpacing = 350;
-  const rootX = 600;
-
-  const totalWidth = (rawData.Timelines.length - 1) * timelineSpacing;
-  const startX = rootX - totalWidth / 2;
+    x: 0,
+    y: ROOT_Y,
+    width: NODE_WIDTH,
+    timeline: rawData,
+    type: "question",
+    children: [],
+  };
 
   rawData.Timelines.forEach((timeline, index) => {
-    const timelineX = startX + index * timelineSpacing;
+    const timelineLayout = buildLayoutTree(
+      timeline,
+      `timeline-${index}`,
+      "timeline",
+      rootLayout
+    );
+    rootLayout.children.push(timelineLayout);
+  });
 
-    // Timeline node - ONLY create timeline nodes, NOT simulation nodes
-    nodes.push({
-      id: `timeline-${index}`,
-      type: "card",
-      data: {
-        item: timeline, // This should be the timeline object, not simulation
-        label:
-          (timeline.tldr || timeline.summary || `Timeline ${index + 1}`).slice(
-            0,
-            80
-          ) + "...",
-        onFork,
-        type: "timeline", // Add type to distinguish
-      },
-      position: { x: timelineX, y: rootToTimelineSpacing },
+  calculatePositions(
+    rootLayout,
+    NODE_WIDTH,
+    MIN_HORIZONTAL_SPACING,
+    VERTICAL_SPACING
+  );
+
+  convertLayoutToNodes(rootLayout, nodes, edges, onFork);
+
+  console.log("Generated nodes:", nodes);
+  console.log("Generated edges:", edges);
+  return { nodes, edges };
+}
+
+function buildLayoutTree(
+  timeline: Timeline,
+  nodeId: string,
+  type: string,
+  parent?: LayoutNode
+): LayoutNode {
+  const layoutNode: LayoutNode = {
+    id: nodeId,
+    x: 0,
+    y: 0,
+    width: 400,
+    timeline,
+    type,
+    children: [],
+    parent,
+  };
+
+  if (timeline.forks && timeline.forks.length > 0) {
+    timeline.forks.forEach((fork, index) => {
+      const forkId = `${nodeId}-fork-${index}`;
+      const forkType =
+        parent?.type === "question"
+          ? "fork"
+          : `fork-level-${getDepth(layoutNode)}`;
+      const forkLayout = buildLayoutTree(fork, forkId, forkType, layoutNode);
+      layoutNode.children.push(forkLayout);
     });
+  }
 
-    // Edge from root to timeline
+  return layoutNode;
+}
+
+function getDepth(node: LayoutNode): number {
+  let depth = 0;
+  let current = node.parent;
+  while (current) {
+    depth++;
+    current = current.parent;
+  }
+  return depth;
+}
+
+function calculatePositions(
+  root: LayoutNode,
+  nodeWidth: number,
+  minSpacing: number,
+  verticalSpacing: number
+) {
+  calculateSubtreeWidths(root, nodeWidth, minSpacing);
+
+  positionNodes(root, 0, verticalSpacing);
+
+  centerTree(root);
+}
+
+function calculateSubtreeWidths(
+  node: LayoutNode,
+  nodeWidth: number,
+  minSpacing: number
+): number {
+  if (node.children.length === 0) {
+    node.width = nodeWidth;
+    return nodeWidth;
+  }
+
+  let totalChildrenWidth = 0;
+  node.children.forEach((child) => {
+    totalChildrenWidth += calculateSubtreeWidths(child, nodeWidth, minSpacing);
+  });
+
+  const spacingWidth = (node.children.length - 1) * minSpacing;
+  const childrenWidth = totalChildrenWidth + spacingWidth;
+
+  node.width = Math.max(nodeWidth, childrenWidth);
+  return node.width;
+}
+
+function positionNodes(node: LayoutNode, x: number, verticalSpacing: number) {
+  node.x = x;
+
+  if (node.children.length === 0) {
+    return;
+  }
+
+  const childY = node.y + verticalSpacing;
+
+  let totalChildrenWidth = 0;
+  node.children.forEach((child) => {
+    totalChildrenWidth += child.width;
+  });
+
+  const totalSpacing = (node.children.length - 1) * 50;
+  const childrenTotalWidth = totalChildrenWidth + totalSpacing;
+
+  let currentX = node.x + (300 - childrenTotalWidth) / 2; // 300 is node width
+
+  node.children.forEach((child) => {
+    child.y = childY;
+    positionNodes(child, currentX + child.width / 2 - 150, verticalSpacing);
+    currentX += child.width + 50;
+  });
+}
+
+function centerTree(root: LayoutNode) {
+  const bounds = getTreeBounds(root);
+
+  const centerX = 600;
+  const treeCenter = (bounds.minX + bounds.maxX) / 2;
+  const offsetX = centerX - treeCenter;
+
+  applyOffset(root, offsetX, 0);
+}
+
+function getTreeBounds(node: LayoutNode): {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+} {
+  let minX = node.x - 150;
+  let maxX = node.x + 150;
+  let minY = node.y;
+  let maxY = node.y;
+
+  node.children.forEach((child) => {
+    const childBounds = getTreeBounds(child);
+    minX = Math.min(minX, childBounds.minX);
+    maxX = Math.max(maxX, childBounds.maxX);
+    minY = Math.min(minY, childBounds.minY);
+    maxY = Math.max(maxY, childBounds.maxY);
+  });
+
+  return { minX, maxX, minY, maxY };
+}
+
+function applyOffset(node: LayoutNode, offsetX: number, offsetY: number) {
+  node.x += offsetX;
+  node.y += offsetY;
+
+  node.children.forEach((child) => {
+    applyOffset(child, offsetX, offsetY);
+  });
+}
+
+function convertLayoutToNodes(
+  layoutNode: LayoutNode,
+  nodes: any[],
+  edges: any[],
+  onFork?: (timelineId: string) => void
+) {
+  const isQuestion = layoutNode.type === "question";
+  const timeline = layoutNode.timeline as any;
+
+  nodes.push({
+    id: layoutNode.id,
+    type: "card",
+    data: {
+      item: layoutNode.timeline,
+      label: isQuestion
+        ? `Question: ${timeline.text}`
+        : (timeline.tldr || timeline.summary || `Timeline`).slice(0, 80) +
+          "...",
+      onFork,
+      type: layoutNode.type,
+    },
+    position: { x: layoutNode.x - 150, y: layoutNode.y },
+  });
+
+  layoutNode.children.forEach((child) => {
     edges.push({
-      id: `edges-root-timeline-${index}`,
-      source: "root",
-      target: `timeline-${index}`,
+      id: `edge-${layoutNode.id}-${child.id}`,
+      source: layoutNode.id,
+      target: child.id,
       animated: true,
       markerEnd: { type: "arrowclosed" },
     });
 
-    // Fork nodes - ONLY if forks exist
-    if (timeline.forks && timeline.forks.length > 0) {
-      const forkCount = timeline.forks.length;
-      const forkStartX = timelineX - ((forkCount - 1) * forkSpacing) / 2;
-
-      timeline.forks.forEach((fork, forkIndex) => {
-        const forkX = forkStartX + forkIndex * forkSpacing;
-        const forkY = rootToTimelineSpacing + timelineToForkSpacing;
-
-        // Fork node
-        nodes.push({
-          id: `timeline-${index}-fork-${forkIndex}`,
-          type: "card",
-          data: {
-            item: fork, // This should be the fork object
-            label:
-              (fork.tldr || fork.summary || `Fork ${forkIndex + 1}`).slice(
-                0,
-                80
-              ) + "...",
-            onFork,
-            type: "fork", // Add type to distinguish
-          },
-          position: { x: forkX, y: forkY },
-        });
-
-        // Edge from timeline to fork
-        edges.push({
-          id: `edges-timeline-${index}-fork-${forkIndex}`,
-          source: `timeline-${index}`,
-          target: `timeline-${index}-fork-${forkIndex}`,
-          animated: true,
-          markerEnd: { type: "arrowclosed" },
-        });
-      });
-    }
+    convertLayoutToNodes(child, nodes, edges, onFork);
   });
-
-  console.log("Generated nodes:", nodes);
-  console.log("Generated edges:", edges);
-
-  return { nodes, edges };
 }
