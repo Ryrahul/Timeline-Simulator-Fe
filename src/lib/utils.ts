@@ -30,6 +30,7 @@ export interface Timeline {
   createdAt: string;
   simulation: Simulation[];
   forks?: Timeline[];
+  forkQuestion?: string;
 }
 
 export interface QuestionResponse {
@@ -55,7 +56,6 @@ export function buildNodesAndEdges(
   rawData: QuestionResponse,
   onFork?: (timelineId: string) => void
 ) {
-  console.log(rawData);
   if (!rawData?.Timelines || rawData.Timelines.length === 0)
     return { nodes: [], edges: [] };
 
@@ -63,8 +63,8 @@ export function buildNodesAndEdges(
   const edges: any[] = [];
 
   const NODE_WIDTH = 300;
-  const MIN_HORIZONTAL_SPACING = 50;
-  const VERTICAL_SPACING = 200;
+  const MIN_HORIZONTAL_SPACING = 150;
+  const VERTICAL_SPACING = 350;
   const ROOT_Y = 0;
 
   const rootLayout: LayoutNode = {
@@ -96,8 +96,6 @@ export function buildNodesAndEdges(
 
   convertLayoutToNodes(rootLayout, nodes, edges, onFork);
 
-  console.log("Generated nodes:", nodes);
-  console.log("Generated edges:", edges);
   return { nodes, edges };
 }
 
@@ -111,7 +109,7 @@ function buildLayoutTree(
     id: nodeId,
     x: 0,
     y: 0,
-    width: 400,
+    width: 300,
     timeline,
     type,
     children: [],
@@ -150,9 +148,7 @@ function calculatePositions(
   verticalSpacing: number
 ) {
   calculateSubtreeWidths(root, nodeWidth, minSpacing);
-
-  positionNodes(root, 0, verticalSpacing);
-
+  positionNodes(root, 0, verticalSpacing, minSpacing);
   centerTree(root);
 }
 
@@ -178,7 +174,12 @@ function calculateSubtreeWidths(
   return node.width;
 }
 
-function positionNodes(node: LayoutNode, x: number, verticalSpacing: number) {
+function positionNodes(
+  node: LayoutNode,
+  x: number,
+  verticalSpacing: number,
+  minSpacing: number
+) {
   node.x = x;
 
   if (node.children.length === 0) {
@@ -192,15 +193,17 @@ function positionNodes(node: LayoutNode, x: number, verticalSpacing: number) {
     totalChildrenWidth += child.width;
   });
 
-  const totalSpacing = (node.children.length - 1) * 50;
+  const totalSpacing = (node.children.length - 1) * minSpacing;
   const childrenTotalWidth = totalChildrenWidth + totalSpacing;
 
-  let currentX = node.x + (300 - childrenTotalWidth) / 2; // 300 is node width
+  let currentX = node.x - childrenTotalWidth / 2;
 
-  node.children.forEach((child) => {
+  node.children.forEach((child, index) => {
     child.y = childY;
-    positionNodes(child, currentX + child.width / 2 - 150, verticalSpacing);
-    currentX += child.width + 50;
+    const childCenterX = currentX + child.width / 2;
+    positionNodes(child, childCenterX, verticalSpacing, minSpacing);
+
+    currentX += child.width + minSpacing;
   });
 }
 
@@ -220,8 +223,9 @@ function getTreeBounds(node: LayoutNode): {
   minY: number;
   maxY: number;
 } {
-  let minX = node.x - 150;
-  let maxX = node.x + 150;
+  const halfWidth = 150;
+  let minX = node.x - halfWidth;
+  let maxX = node.x + halfWidth;
   let minY = node.y;
   let maxY = node.y;
 
@@ -252,7 +256,6 @@ function convertLayoutToNodes(
   onFork?: (timelineId: string) => void
 ) {
   const isQuestion = layoutNode.type === "question";
-  const timeline = layoutNode.timeline as any;
 
   nodes.push({
     id: layoutNode.id,
@@ -260,9 +263,12 @@ function convertLayoutToNodes(
     data: {
       item: layoutNode.timeline,
       label: isQuestion
-        ? `Question: ${timeline.text}`
-        : (timeline.tldr || timeline.summary || `Timeline`).slice(0, 80) +
-          "...",
+        ? `Question: ${(layoutNode.timeline as QuestionResponse).text}`
+        : (
+            (layoutNode.timeline as Timeline).tldr ||
+            (layoutNode.timeline as Timeline).summary ||
+            `Timeline`
+          ).slice(0, 80) + "...",
       onFork,
       type: layoutNode.type,
     },

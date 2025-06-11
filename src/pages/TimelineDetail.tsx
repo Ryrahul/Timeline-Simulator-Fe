@@ -135,7 +135,6 @@ export default function TimelineDetailPage(): JSX.Element {
     },
   });
 
-  // Update nodes and edges when timeline data changes
   useEffect(() => {
     if (timelineData) {
       const { nodes: newNodes, edges: newEdges } = buildNodesAndEdges(

@@ -31,6 +31,7 @@ interface SimulationData {
 }
 
 export interface TimelineItem {
+  forkQuestion?: string;
   id: string;
   summary?: string;
   tldr?: string;
@@ -117,6 +118,7 @@ export default function EnhancedTimelineSimulator(): JSX.Element {
   return (
     <div className="w-full h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden relative">
       <ProgressiveLoader isLoading={isPending} />
+      <ProgressiveLoader isLoading={forkMutation.isPending} />
 
       <AnimatedBackground />
 

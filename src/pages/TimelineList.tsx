@@ -64,14 +64,14 @@ const getAgentIcon = (agentType: string) => {
   const type = agentType?.toLowerCase();
 
   if (type?.includes("finance")) {
-    return <TrendingUp className="w-4 h-4 text-green-400" />;
+    return <TrendingUp className="w-4 h-4 text-emerald-400" />;
   } else if (type?.includes("mental_health")) {
-    return <Brain className="w-4 h-4 text-blue-400" />;
+    return <Brain className="w-4 h-4 text-cyan-400" />;
   } else if (type?.includes("personal_growth")) {
     return <Target className="w-4 h-4 text-purple-400" />;
   }
 
-  return <Lightbulb className="w-4 h-4 text-yellow-400" />;
+  return <Lightbulb className="w-4 h-4 text-amber-400" />;
 };
 
 const formatTimeAgo = (date: string): string => {
@@ -174,42 +174,56 @@ export default function TimelineListPage(): JSX.Element {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
+      {/* Enhanced animated background with more vibrant colors */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-pink-500/10 animate-pulse"></div>
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-emerald-400/15 to-teal-600/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
       <AnimatedBackground />
 
       <Navbar />
 
-      <div className="relative z-10 p-6 bg-gray-900/30 backdrop-blur-sm border-b border-gray-700/30">
+      <div className="relative z-10 p-6 bg-gradient-to-r from-slate-900/50 via-purple-900/30 to-slate-900/50 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center space-x-3 mb-2">
-                <Brain className="w-7 h-7 text-cyan-400" />
-                <h1 className="text-2xl font-bold">My Timelines</h1>
+                <div className="p-2 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-xl shadow-lg">
+                  <Brain className="w-7 h-7 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  My Timelines
+                </h1>
               </div>
-              <p className="text-gray-400">
+              <p className="text-slate-300 text-lg">
                 Explore your past scenarios and create new timeline simulations
               </p>
             </div>
             <Link to="/simulator">
-              <Button className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-cyan-500/25">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-600 hover:from-cyan-400 hover:via-purple-500 hover:to-pink-500 px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-cyan-500/30 hover:scale-105 border border-white/20">
+                <Plus className="w-5 h-5 mr-2" />
                 New Timeline
               </Button>
             </Link>
           </div>
 
           {error && (
-            <Alert className="mb-6 bg-red-900/20 border-red-500/30 text-red-200">
-              <AlertCircle className="h-4 w-4" />
+            <Alert className="mb-6 bg-gradient-to-r from-red-900/30 to-pink-900/30 border border-red-500/50 text-red-100 shadow-xl backdrop-blur-sm">
+              <div className="p-1 bg-red-500 rounded-full">
+                <AlertCircle className="h-4 w-4 text-white" />
+              </div>
               <AlertDescription className="flex items-center justify-between">
-                <span>{getErrorMessage(error)}</span>
+                <span className="text-red-100">{getErrorMessage(error)}</span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleRetry}
                   disabled={isRefetching}
-                  className="ml-4 border-red-500/30 text-red-200 hover:bg-red-500/20"
+                  className="ml-4 border-red-400/50 text-red-100 hover:bg-red-500/30 bg-red-500/20 backdrop-blur-sm"
                 >
                   {isRefetching ? (
                     <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
@@ -226,20 +240,22 @@ export default function TimelineListPage(): JSX.Element {
             <>
               <div className="flex flex-col md:flex-row gap-4 mb-6">
                 <div className="flex-1 relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 p-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full">
+                    <Search className="w-4 h-4 text-white" />
+                  </div>
                   <Input
                     placeholder="Search timelines by question or insights..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400 focus:ring-cyan-400/50"
+                    className="pl-12 py-3 bg-slate-800/50 border border-slate-600/50 text-white placeholder-slate-400 focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 backdrop-blur-sm rounded-xl shadow-lg"
                   />
                 </div>
                 <div className="flex gap-3">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-40 bg-gray-800/50 border-gray-600/50 text-white">
+                    <SelectTrigger className="w-40 py-3 bg-slate-800/50 border border-slate-600/50 text-white backdrop-blur-sm rounded-xl shadow-lg">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectContent className="bg-slate-800/90 border border-slate-700/50 backdrop-blur-xl rounded-xl shadow-2xl">
                       <SelectItem value="newest">Newest First</SelectItem>
                       <SelectItem value="oldest">Oldest First</SelectItem>
                       <SelectItem value="question">By Question</SelectItem>
@@ -248,26 +264,32 @@ export default function TimelineListPage(): JSX.Element {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <Card className="bg-gray-800/30 border-gray-700/50">
-                  <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <Card className="bg-gradient-to-br from-slate-800/40 to-cyan-900/20 border border-cyan-500/30 backdrop-blur-sm shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 rounded-2xl">
+                  <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-400">Total Timelines</p>
-                        <p className="text-2xl font-bold text-white">
+                        <p className="text-slate-400 text-sm font-medium">
+                          Total Timelines
+                        </p>
+                        <p className="text-3xl font-bold text-white mt-1">
                           {timelineData.length}
                         </p>
                       </div>
-                      <GitBranch className="w-8 h-8 text-cyan-400" />
+                      <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg">
+                        <GitBranch className="w-8 h-8 text-white" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="bg-gray-800/30 border-gray-700/50">
-                  <CardContent className="p-4">
+                <Card className="bg-gradient-to-br from-slate-800/40 to-purple-900/20 border border-purple-500/30 backdrop-blur-sm shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 rounded-2xl">
+                  <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-400">This Month</p>
-                        <p className="text-2xl font-bold text-white">
+                        <p className="text-slate-400 text-sm font-medium">
+                          This Month
+                        </p>
+                        <p className="text-3xl font-bold text-white mt-1">
                           {
                             timelineData.filter(
                               (t) =>
@@ -278,7 +300,9 @@ export default function TimelineListPage(): JSX.Element {
                           }
                         </p>
                       </div>
-                      <Calendar className="w-8 h-8 text-purple-400" />
+                      <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg">
+                        <Calendar className="w-8 h-8 text-white" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -292,22 +316,24 @@ export default function TimelineListPage(): JSX.Element {
         <div className="max-w-7xl mx-auto">
           {error && !isLoading ? (
             <div className="text-center py-16">
-              <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-300 mb-2">
+              <div className="p-4 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl shadow-xl mx-auto mb-6 w-fit">
+                <AlertCircle className="w-16 h-16 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-200 mb-3">
                 Something went wrong
               </h3>
-              <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              <p className="text-slate-400 mb-8 max-w-md mx-auto text-lg">
                 {getErrorMessage(error)}
               </p>
               <Button
                 onClick={handleRetry}
                 disabled={isRefetching}
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700"
+                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 px-8 py-4 rounded-xl shadow-2xl hover:scale-105 transition-all duration-300"
               >
                 {isRefetching ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-5 h-5 mr-2" />
                 )}
                 Try Again
               </Button>
@@ -317,16 +343,16 @@ export default function TimelineListPage(): JSX.Element {
               {[...Array(6)].map((_, i) => (
                 <Card
                   key={i}
-                  className="bg-gray-800/30 border-gray-700/50 animate-pulse"
+                  className="bg-gradient-to-br from-slate-800/40 to-slate-700/40 border border-slate-600/30 backdrop-blur-sm rounded-2xl shadow-xl animate-pulse"
                 >
                   <CardContent className="p-6">
-                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
-                    <div className="h-3 bg-gray-700 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-700 rounded mb-4"></div>
-                    <div className="flex space-x-2">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
-                      <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
-                      <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
+                    <div className="h-5 bg-gradient-to-r from-slate-600 to-slate-500 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gradient-to-r from-slate-600 to-slate-500 rounded mb-2"></div>
+                    <div className="h-4 bg-gradient-to-r from-slate-600 to-slate-500 rounded mb-4"></div>
+                    <div className="flex space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-500 rounded-xl"></div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-500 rounded-xl"></div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-500 rounded-xl"></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -334,19 +360,21 @@ export default function TimelineListPage(): JSX.Element {
             </div>
           ) : filteredTimelines.length === 0 ? (
             <div className="text-center py-16">
-              <Brain className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-300 mb-2">
+              <div className="p-4 bg-gradient-to-br from-slate-700 to-slate-600 rounded-2xl shadow-xl mx-auto mb-6 w-fit">
+                <Brain className="w-16 h-16 text-slate-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-200 mb-3">
                 {searchQuery ? "No timelines found" : "No timelines yet"}
               </h3>
-              <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              <p className="text-slate-400 mb-8 max-w-md mx-auto text-lg">
                 {searchQuery
                   ? "Try adjusting your search terms or filters"
                   : "Create your first timeline simulation to get started exploring different life scenarios."}
               </p>
               {!searchQuery && (
                 <Link to="/simulator">
-                  <Button className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700">
-                    <Plus className="w-4 h-4 mr-2" />
+                  <Button className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 px-8 py-4 rounded-xl shadow-2xl hover:scale-105 transition-all duration-300">
+                    <Plus className="w-5 h-5 mr-2" />
                     Create Your First Timeline
                   </Button>
                 </Link>
@@ -357,22 +385,24 @@ export default function TimelineListPage(): JSX.Element {
               {filteredTimelines.map((timeline, index) => (
                 <Card
                   key={timeline.id || index}
-                  className="bg-gray-800/30 border-gray-700/50 hover:bg-gray-800/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer group"
+                  className="bg-gradient-to-br from-slate-800/50 to-slate-700/30 border border-slate-600/40 hover:border-cyan-500/50 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 cursor-pointer group hover:scale-105 hover:-translate-y-2"
                   onClick={() => navigate(`/simulator/${timeline.id}`)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-white text-sm leading-tight mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">
+                        <h3 className="font-bold text-white text-base leading-tight mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300 line-clamp-2">
                           {timeline.text}
                         </h3>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 transition-colors flex-shrink-0 ml-2" />
+                      <div className="p-1 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-lg group-hover:from-cyan-500 group-hover:to-purple-500 transition-all duration-300">
+                        <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors flex-shrink-0 ml-2" />
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
                     {timeline.Timelines[0]?.tldr && (
-                      <p className="text-gray-400 text-xs leading-relaxed mb-4 line-clamp-3">
+                      <p className="text-slate-400 text-sm leading-relaxed mb-5 line-clamp-3 group-hover:text-slate-300 transition-colors">
                         {timeline.Timelines[0].tldr}
                       </p>
                     )}
@@ -381,13 +411,13 @@ export default function TimelineListPage(): JSX.Element {
                       <div className="flex items-center space-x-2">
                         {timeline.Timelines[0]?.simulation &&
                         timeline.Timelines[0].simulation.length > 0 ? (
-                          <div className="flex space-x-1">
+                          <div className="flex space-x-2">
                             {timeline.Timelines[0].simulation
                               .slice(0, 3)
                               .map((sim, idx) => (
                                 <div
                                   key={idx}
-                                  className="w-8 h-8 rounded-full bg-gray-700/50 border border-gray-600/50 flex items-center justify-center"
+                                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700/80 to-slate-600/80 border border-slate-500/50 flex items-center justify-center backdrop-blur-sm group-hover:from-slate-600 group-hover:to-slate-500 transition-all duration-300 shadow-lg"
                                   title={
                                     sim.agentType?.replace(/_/g, " ") || "Agent"
                                   }
@@ -396,34 +426,38 @@ export default function TimelineListPage(): JSX.Element {
                                 </div>
                               ))}
                             {timeline.Timelines[0].simulation.length > 3 && (
-                              <div className="w-8 h-8 rounded-full bg-gray-700/50 border border-gray-600/50 flex items-center justify-center">
-                                <span className="text-xs text-gray-400">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700/80 to-slate-600/80 border border-slate-500/50 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                <span className="text-xs text-slate-300 font-semibold">
                                   +{timeline.Timelines[0].simulation.length - 3}
                                 </span>
                               </div>
                             )}
                           </div>
                         ) : (
-                          <div className="flex space-x-1">
-                            <div className="w-8 h-8 rounded-full bg-gray-700/30 border border-gray-600/30 flex items-center justify-center">
-                              <Brain className="w-4 h-4 text-gray-500" />
+                          <div className="flex space-x-2">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700/60 to-slate-600/60 border border-slate-500/30 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                              <Brain className="w-4 h-4 text-slate-400" />
                             </div>
                           </div>
                         )}
                       </div>
 
                       {timeline.createdAt && (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="w-3 h-3 mr-1" />
+                        <div className="flex items-center text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                          <div className="p-1 bg-slate-600/30 rounded-full mr-2">
+                            <Clock className="w-3 h-3" />
+                          </div>
                           {formatTimeAgo(timeline.createdAt)}
                         </div>
                       )}
                     </div>
 
                     {timeline.Timelines.length > 1 && (
-                      <div className="mt-3 pt-3 border-t border-gray-700/50">
-                        <div className="flex items-center text-xs text-gray-400">
-                          <GitBranch className="w-3 h-3 mr-1" />
+                      <div className="mt-4 pt-4 border-t border-slate-600/30">
+                        <div className="flex items-center text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                          <div className="p-1 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-full mr-2">
+                            <GitBranch className="w-3 h-3" />
+                          </div>
                           {timeline.Timelines.length} scenarios generated
                         </div>
                       </div>

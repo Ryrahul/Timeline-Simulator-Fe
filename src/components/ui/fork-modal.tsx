@@ -170,21 +170,14 @@ export function ForkModal({
               disabled={isLoading || !question.trim()}
               className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center"
             >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>Create Fork</span>
-                </>
-              )}
+              <>
+                <Zap className="w-4 h-4" />
+                <span>Create Fork</span>
+              </>
             </button>
           </div>
         </div>
-
+        {/* 
         {isLoading && (
           <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-20">
             <div className="text-center space-y-4">
@@ -202,7 +195,7 @@ export function ForkModal({
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
       </div>
